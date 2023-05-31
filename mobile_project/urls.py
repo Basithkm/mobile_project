@@ -20,7 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
-admin.site. site_header ='Mobile Pouch Admn Page'
+admin.site. site_header ='Mobile Pouch Adn Page'
 admin. site. index_title = 'Admin Panel'
 
 urlpatterns = [

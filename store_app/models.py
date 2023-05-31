@@ -103,52 +103,32 @@ class MobilePouch(models.Model):
 
 
 
-# class Cart(models.Model):
-#     user = models.OneToOneField(Account, on_delete=models.CASCADE)
-#     products = models.ManyToManyField(MobilePouch, through='CartItem')
-
-#     def __str__(self):
-#         return f"Cart for {self.user.email}"
-    
 
 
 # class CartItem(models.Model):
-#     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+#     # user = models.ForeignKey(Account, on_delete=models.CASCADE,blank=False,null=False)
+#     session_key = models.CharField(max_length=50)
 #     product = models.ForeignKey(MobilePouch, on_delete=models.CASCADE)
 #     quantity = models.PositiveIntegerField(default=1)
 
 
-#     def __str__(self):
-#         return f"{self.product.product_name} - {self.product.phone_name} - {self.quantity}"
-
-
-
-# class CartItem(models.Model):
-#     product=models.ForeignKey(MobilePouch,on_delete=models.CASCADE,null=True)
-#     quantity = models.PositiveIntegerField(default=1,null=True)
-#     user = models.ForeignKey(Account, on_delete=models.CASCADE,null=True)
-
-#     @property
-#     def price(self):
-#         return self.product.price
-    
 #     @property
 #     def total_cost(self):
-#         return self.quantity * self.product.price
-
-#     def __str__(self):
-#         return f"{self.quantity} of {self.product.product_name}"
-
+#         return self.quantity * self.product.offer_price
+    
 
 class CartItem(models.Model):
-    # user = models.ForeignKey(Account, on_delete=models.CASCADE,blank=True,null=True)
-    session_key = models.CharField(max_length=50)
-    product = models.ForeignKey(MobilePouch, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
+    product=models.ForeignKey(MobilePouch,on_delete=models.CASCADE,null=True)
+    quantity = models.PositiveIntegerField(default=1,null=True)
+    user = models.ForeignKey(Account, on_delete=models.CASCADE,null=True)
 
-
+    @property
+    def price(self):
+        return self.product.offer_price
+    
     @property
     def total_cost(self):
         return self.quantity * self.product.offer_price
-    
 
+    def __str__(self):
+        return f"{self.quantity} of {self.product.phone_name}"

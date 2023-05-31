@@ -1,19 +1,7 @@
-<!-- cart_item.html -->
-<tr>
-    <td>{{ cart_item.product.name }}</td>
-    <td>{{ cart_item.quantity }}</td>
-    <td>{{ cart_item.product.price }}</td>
-    <td>{{ cart_item.quantity|mul:cart_item.product.price }}</td>
-    <td>
-      <form method="post" action="{% url 'cart_update' cart_item.id %}">
-        {% csrf_token %}
-        <input type="number" name="quantity" value="{{ cart_item.quantity }}" min="1">
-        <button type="submit">Update</button>
-      </form>
-      <form method="post" action="{% url 'cart_remove' cart_item.id %}">
-        {% csrf_token %}
-        <button type="submit">Remove</button>
-      </form>
-    </td>
-  </tr>
-  
+{% for a in a  %}
+
+{{a.session_key}}
+{{a.product.brand_name}}
+{{a.quantity}}
+
+{% endfor %}

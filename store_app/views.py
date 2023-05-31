@@ -2,6 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from .models import *
 from django.http import JsonResponse
+from django.urls import reverse
 from django.shortcuts import render,redirect,get_object_or_404
 
 from django.contrib.auth.decorators import login_required
@@ -106,50 +107,92 @@ def product_inner_page(request,id):
 
 
 
-def cart(request):
-    session_key = request.session.session_key
-    cart_items = CartItem.objects.filter(session_key=session_key)
-
-
-    total = sum(item.product.offer_price * item.quantity for item in cart_items)
-
-    return render(request, 'store/cart.html', {'cart_items': cart_items,"total": total})
+# def cart(request):
+#     session_key = request.session.session_key
+#     cart_items = CartItem.objects.filter(session_key=session_key)
+#     total = sum(item.product.offer_price * item.quantity for item in cart_items)
+#     return render(request, 'store/cart.html', {'cart_items': cart_items,"total": total})
 
 
 
-def add_to_cart(request, product_id):
-    product = MobilePouch.objects.get(id=product_id)
-    session_key = request.session.session_key
-    if not session_key:
-        request.session.cycle_key()
-        session_key = request.session.session_key
-    cart_item, created = CartItem.objects.get_or_create(session_key=session_key, product=product)
-    if not created:
-        cart_item.quantity += 1
-        cart_item.save()
-    return JsonResponse({'success': True})
-
-
-def remove_from_cart(request, cart_item_id):
-    cart_item = get_object_or_404(CartItem, id=cart_item_id)
-    cart_item.delete()
-    return JsonResponse({'success': True})
+# def add_to_cart(request, product_id):
+#     product = MobilePouch.objects.get(id=product_id)
+#     session_key = request.session.session_key
+#     if not session_key:
+#         request.session.cycle_key()
+#         session_key = request.session.session_key
+#     cart_item, created = CartItem.objects.get_or_create(session_key=session_key, product=product)
+#     if not created:
+#         cart_item.quantity += 1
+#         cart_item.save()
+#     return JsonResponse({'success': True})
 
 
 
-from django.views.decorators.http import require_POST
 
-@require_POST
-def update_cart_item_quantity(request, cart_item_id):
-    cart_item = get_object_or_404(CartItem, id=cart_item_id)
-    new_quantity = int(request.POST.get('quantity', 0))
-    if new_quantity > 0:
-        cart_item.quantity = new_quantity
-        cart_item.save()
+
+# def remove_from_cart(request, cart_item_id):
+#     cart_item = get_object_or_404(CartItem, id=cart_item_id)
+#     cart_item.delete()
+#     return JsonResponse({'success': True})
+
+
+
+
+
+
+
+def add_to_cart_item(request, id):
+    if request.user.is_authenticated:
+        product = get_object_or_404(MobilePouch, id=id)
+        cart_item, created = CartItem.objects.get_or_create(
+            product=product,
+            user=request.user,
+        )
+        if not created:
+            cart_item.quantity += 1
+            cart_item.save()
         return JsonResponse({'success': True})
     else:
-        return JsonResponse({'success': False})
+        return render(request,'registration/login.html')
     
 
+def add_to_cart(request, id):
+    cart_item = get_object_or_404(CartItem, id=id,user=request.user)
+    if request.user.is_authenticated:
+        user=request.user
+        cart_item.quantity += 1
+        cart_item.save()
+        return redirect("cart_detail")
+    else:
+        url = reverse('signin') 
+        return redirect(url)
+    
 
-# sum(item.product.offer_price * item.quantity for item in cart_items)
+def remove_from_cart(request, id):
+    cart_item = get_object_or_404(CartItem, id=id, user=request.user)
+    if request.user.is_authenticated:
+        user=request.user
+        if cart_item.quantity > 1:
+            cart_item.quantity -= 1
+            cart_item.save()
+        else:
+            cart_item.delete()
+        return redirect("cart_detail")
+    else:
+        url = reverse('signin') 
+        return redirect(url)
+    
+
+def cart_detail(request):
+    if request.user.is_authenticated:
+        user=request.user
+        cart_items = CartItem.objects.filter(user=request.user)
+        total = sum(item.product.offer_price * item.quantity for item in cart_items)
+        return render(request, "store/cart.html", {
+            "cart_items": cart_items,
+            "total": total, 
+        })
+    else:
+        url = reverse('signin') 
+        return redirect(url)

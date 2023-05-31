@@ -1,4 +1,4 @@
-
+{% comment %} 
 
 <table class="table">
   <thead>
@@ -101,4 +101,41 @@ $(document).ready(function() {
       }
   });
   </script>
+ {% endcomment %}
 
+
+
+ 
+
+
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">price</th>
+        <th scope="col">total price</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%for item in cart_items %} 
+      <tr>
+        
+        <td scope="col">{{item.product.product_name}}</td>
+         <td scope="col"><a href="{% url 'remove_from_cart' item.id %}"><button class="btn btn-danger">-</button></a> {{item.quantity}}<a href="{% url 'add_to_cart' item.id %}"><button class="btn btn-primary">  +  </button></a></td>
+        <td scope="col">RS  {{item.price}}</td>
+        
+        <td scope="col">RS:  {{item.total_cost}}</td>
+  
+  
+  
+      </tr>
+      {%endfor%}
+    </tbody>
+  </table>
+  <div class="row justify-content-center">
+  <h3>Total: Rs   :{{total}}/- <span class="badge badge-primary" id="total"></span></h3>
+  </div>
+  <br>
+ 
+  

@@ -48,7 +48,8 @@
         <h2>Product Name : {{product.product_name}}</h2>
         <p>Phone Name: {{product.phone_name}}</p>
         <p>Brand: {{product.brand_name}}</p>
-        <button class="add-to-cart-btn" data-product-id="{{ product.id }}">Add to Cart</button>
+        <td><a href="{% url 'add_to_cart_item' product.id %}"><button class="btn submit">Buy Now </button></a></td>
+        {% comment %} <button class="add-to-cart-btn" data-product-id="{{ product.id }}">Add to Cart</button> {% endcomment %}
         
       </div>
     </div>
@@ -56,7 +57,7 @@
   {% endif %}
 </body>
 
-
+{% comment %} 
 <script> 
 $(document).ready(function() {
     $('.add-to-cart-btn').click(function() {
@@ -80,4 +81,4 @@ $(document).ready(function() {
 </script>
 
 
-</html>
+</html> {% endcomment %}
