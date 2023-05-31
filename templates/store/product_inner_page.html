@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .product-image {
+      max-width: 100%;
+      margin-bottom: 20px;
+    }
+  </style>
+  <title>Product Inner Page</title>
+</head>
+<body>
+    {% if product %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <img class="product-image" src="{{product.cover_image.url}}" alt="Product Image">
+        <div class="row">
+        {% if product.image1 %}
+          <div class="col-md-4">
+            <img class="product-image" src="{{product.image1.url}}" alt="Product Image 1">
+          </div>
+          {% endif %}
+          {% if product.image2 %}
+          <div class="col-md-4">
+            <img class="product-image" src="{{product.image2.url}}" alt="Product Image 1">
+          </div>
+          {% endif %}
+          {% if  product.image3%}
+          <div class="col-md-4">
+            <img class="product-image" src="{{product.image3.url}}" alt="Product Image 1">
+          </div>
+          {% endif %}
+          {% if product.image4  %}
+          <div class="col-md-4">
+            <img class="product-image" src="{{product.image4.url}}" alt="Product Image 1">
+          </div>
+          {% endif %}
+
+          
+        </div>
+      </div>
+      <div class="col-md-6">
+        <h2>Product Name : {{product.product_name}}</h2>
+        <p>Phone Name: {{product.phone_name}}</p>
+        <p>Brand: {{product.brand_name}}</p>
+        <button class="add-to-cart-btn" data-product-id="{{ product.id }}">Add to Cart</button>
+        
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</body>
+
+
+<script> 
+$(document).ready(function() {
+    $('.add-to-cart-btn').click(function() {
+        var productId = $(this).data('product-id');
+        $.ajax({
+            url: '/add-to-cart/' + productId + '/',
+            method: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    alert('Product added to cart!');
+                } else {
+                    alert('Failed to add product to cart.');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    });
+});
+</script>
+
+
+</html>
