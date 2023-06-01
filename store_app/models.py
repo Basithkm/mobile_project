@@ -115,7 +115,12 @@ class MobilePouch(models.Model):
 #     @property
 #     def total_cost(self):
 #         return self.quantity * self.product.offer_price
-    
+
+
+# class Cart(models.Model):
+#     id = models.AutoField(primary_key=True)
+#     user = models.ForeignKey(Account,on_delete=models.CASCADE)
+
 
 class CartItem(models.Model):
     product=models.ForeignKey(MobilePouch,on_delete=models.CASCADE,null=True)
@@ -132,3 +137,71 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} of {self.product.phone_name}"
+    
+
+
+class Order(models.Model):
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Order {self.id} - {self.user.first_name}"
+
+
+
+
+
+
+
+class Address(models.Model):
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    total_checkout_price =models.DecimalField(max_digits=10, decimal_places=2,blank=False,null=False)
+    name = models.CharField(max_length=100,blank=False,null=False)
+    address = models.CharField(max_length=200,blank=False,null=False)
+    phone = models.CharField(max_length=20,blank=False,null=False)
+    place = models.CharField(max_length=100,blank=False,null=False)
+    district = models.CharField(max_length=100,blank=False,null=False)
+    payment_type = models.CharField(max_length=10,blank=False,null=False)
+    
+
+
+
+    def __str__(self):
+        return f"{self.user.first_name}'s Address - {self.name}"
+
+
+
+class OrderItem(models.Model):
+    delivary_address = models.ForeignKey(Address, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    product = models.ForeignKey(MobilePouch, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+
+    @property
+    def total(self):
+        return self.quantity * self.product.offer_price
+
+
+
+
+
+    
+    def __str__(self):
+        return f"Order {self.order.id} - {self.product.brand_name}"
+
+
+
+# class Checkout(models.Model):
+#     user =models.ForeignKey(Account,on_delete=models.CASCADE,null=False)
+#     cartitem =models.ForeignKey(CartItem,on_delete=models.CASCADE,null=True)
+#     total_checkout_price =models.DecimalField(max_digits=10, decimal_places=2,blank=False,null=False)
+#     name = models.CharField(max_length=100,blank=False,null=False)
+#     address = models.CharField(max_length=200,blank=False,null=False)
+#     phone = models.CharField(max_length=20,blank=False,null=False)
+#     place = models.CharField(max_length=100,blank=False,null=False)
+#     district = models.CharField(max_length=100,blank=False,null=False)
+#     payment_type = models.CharField(max_length=10,blank=False,null=False)
+
+ 
+#     def __str__(self):
+#         return self.name

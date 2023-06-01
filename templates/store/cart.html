@@ -1,120 +1,28 @@
-{% comment %} 
-
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">Name</th>
-      <th scope="col">Quantity</th>
-      <th scope="col">price</th>
-      <th scope="col">total</th>
-      <th scope="col">remove</th>
-    
-    </tr>
-  </thead>
-  <tbody>
-    {% for cart_item in cart_items %}
-    <tr>
-      
-      <td scope="col">{{ cart_item.product.phone_name }}</td>
-       <td scope="col">{{ cart_item.quantity }}</td>
-      <td scope="col">RS  {{ cart_item.product.offer_price }}</td>
-      <td scope="col">RS  {{ cart_item.total_cost }}</td>
-      <td scope="col"> <button class="remove-from-cart-btn" data-cartitem-id="{{ cart_item.id }}">Remove</button></td>
-    </tr>
-    {%endfor%}
-
-  </tbody>
-</table>
-<div class="row justify-content-center">
-<h3>Total: Rs   :{{total}}/- <span class="badge badge-primary" id="total"></span></h3>
-</div>
 
 
 
 
-
-<br>
-
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-$(document).ready(function() {
-    $('.remove-from-cart-btn').click(function() {
-        var cartItemId = $(this).data('cartitem-id');
-        $.ajax({
-            url: '/remove-from-cart/' + cartItemId + '/',
-            method: 'GET',
-            success: function(response) {
-                if (response.success) {
-                    alert('Product removed from cart!');
-                    location.reload();  // Refresh the page after removing the item
-                } else {
-                    ('Failed to remove product from cart.');
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error(xhr.responseText);
-            }
-        });
-    });
-});
-</script>
-
-
-<script>
-  $(document).ready(function() {
-      $('.increment-quantity-btn').click(function() {
-          var cartItemId = $(this).data('cartitem-id');
-          var quantityElement = $('#quantity_' + cartItemId);
-          var quantity = parseInt(quantityElement.text()) + 1;
-          updateCartItemQuantity(cartItemId, quantity, quantityElement);
-      });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   
-      $('.decrement-quantity-btn').click(function() {
-          var cartItemId = $(this).data('cartitem-id');
-          var quantityElement = $('#quantity_' + cartItemId);
-          var quantity = parseInt(quantityElement.text()) - 1;
-          if (quantity >= 1) {
-              updateCartItemQuantity(cartItemId, quantity, quantityElement);
-          }
-      });
-  
-      function updateCartItemQuantity(cartItemId, quantity, quantityElement) {
-          $.ajax({
-              url: '/update-cart-item-quantity/' + cartItemId + '/',
-              method: 'POST',
-              data: {
-                  'quantity': quantity,
-                  'csrfmiddlewaretoken': '{{ csrf_token }}'
-              },
-              success: function(response) {
-                  if (response.success) {
-                      quantityElement.text(quantity);
-                  } else {
-                      alert('Failed to update quantity.');
-                  }
-              },
-              error: function(xhr, status, error) {
-                  console.error(xhr.responseText);
-              }
-          });
-      }
-  });
-  </script>
- {% endcomment %}
-
-
-
- 
-
-
-<table class="table">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <table class="table">
     <thead>
       <tr>
         <th scope="col">Name</th>
         <th scope="col">Quantity</th>
         <th scope="col">price</th>
         <th scope="col">total price</th>
+        <th scope="col">remove</th>
+
+        
       </tr>
     </thead>
     <tbody>
@@ -126,16 +34,80 @@ $(document).ready(function() {
         <td scope="col">RS  {{item.price}}</td>
         
         <td scope="col">RS:  {{item.total_cost}}</td>
+
+
+        {% comment %} <td><button class="inc-to-cart-btn" data-product-id="{{ item.id }}">+</button> </td> {% endcomment %}
   
-  
+
+        <td scope="col"> <button class="remove-from-cart-btn" data-product-id="{{ item.id }}">Remove</button></td>
+
+        
+       
   
       </tr>
       {%endfor%}
     </tbody>
   </table>
   <div class="row justify-content-center">
-  <h3>Total: Rs   :{{total}}/- <span class="badge badge-primary" id="total"></span></h3>
+  <h3>Total: Rs  :{{total}}/- <span class="badge badge-primary" id="total"></span></h3>
   </div>
   <br>
  
-  
+
+  <a href={% url 'checkout' %}>checkout</a>
+
+{% comment %} 
+  <script> 
+    $(document).ready(function() {
+        $('.inc-to-cart-btn').click(function() {
+            var productId = $(this).data('product-id');
+            $.ajax({
+                url: '/add/' + productId + '/',
+                method: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        alert('succcess!');
+                    } else {
+                        alert('Please login');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+    });
+    </script> {% endcomment %}
+
+
+</body>
+</html>
+
+
+
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+$('.remove-from-cart-btn').click(function() {
+    var cartItemId = $(this).data('product-id');
+    $.ajax({
+        url: '/remove-from-cart/' + cartItemId + '/',
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                alert('Product removed from cart!');
+                location.reload();  // Refresh the page after removing the item
+            } else {
+                ('Failed to remove product from cart.');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error(xhr.responseText);
+        }
+    });
+});
+});
+</script>

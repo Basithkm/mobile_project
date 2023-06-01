@@ -42,5 +42,50 @@ class PhoneNameAdmin(admin.ModelAdmin):
 
 
 
+@admin.register(models.CartItem)
+class CartItemAdmin(admin.ModelAdmin):
+    list_display =['id','user','product','offer_price','quantity','total_cost']
+    list_per_page = 25
+    # search_fields =['cover_type']
+
+
+    def offer_price(self,product):
+        return product.product.offer_price
+
+
+
+@admin.register(models.Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display =['id','user','created_at']
+    list_per_page = 25
+
+
+
+@admin.register(models.OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+    list_display =['id','product','delivary_address','offer_price','quantity','total','user']
+    list_per_page = 25
+
+
+    def offer_price(self,product):
+        return product.product.offer_price
+    
+
+    def user(self,product):
+        return product.order.user
+
+
+
+
+@admin.register(models.Address)
+class AddressItemAdmin(admin.ModelAdmin):
+    list_display =['name','phone','place','district','payment_type','total_checkout_price']
+    list_per_page = 25
+
+
+
 # admin.site.register(Cart)
-admin.site.register(CartItem)
+# admin.site.register(CartItem)
+# admin.site.register(Order)
+# admin.site.register(OrderItem)
+# admin.site.register(Address)

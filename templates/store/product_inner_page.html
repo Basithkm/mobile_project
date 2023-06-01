@@ -48,8 +48,8 @@
         <h2>Product Name : {{product.product_name}}</h2>
         <p>Phone Name: {{product.phone_name}}</p>
         <p>Brand: {{product.brand_name}}</p>
-        <td><a href="{% url 'add_to_cart_item' product.id %}"><button class="btn submit">Buy Now </button></a></td>
-        {% comment %} <button class="add-to-cart-btn" data-product-id="{{ product.id }}">Add to Cart</button> {% endcomment %}
+        {% comment %} <a href="{% url 'add_to_cart_item' product.id %}"><button class="btn submit">Add cart </button></a> {% endcomment %}
+       <button class="add-to-cart-btn" data-product-id="{{ product.id }}">Add to Cart</button> 
         
       </div>
     </div>
@@ -57,19 +57,18 @@
   {% endif %}
 </body>
 
-{% comment %} 
 <script> 
 $(document).ready(function() {
     $('.add-to-cart-btn').click(function() {
         var productId = $(this).data('product-id');
         $.ajax({
-            url: '/add-to-cart/' + productId + '/',
+            url: '/additem/' + productId + '/',
             method: 'GET',
             success: function(response) {
                 if (response.success) {
                     alert('Product added to cart!');
                 } else {
-                    alert('Failed to add product to cart.');
+                    alert('Please login');
                 }
             },
             error: function(xhr, status, error) {
@@ -80,5 +79,4 @@ $(document).ready(function() {
 });
 </script>
 
-
-</html> {% endcomment %}
+</html> 

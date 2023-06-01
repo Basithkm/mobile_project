@@ -26,4 +26,35 @@
   </div>
   
 
-  <button>place order</button>
+
+
+
+  <h1>Personal Information</h1>
+  <form method="post" action="">
+    {% csrf_token %}
+
+
+    <input type="hidden" name="total_price" value="{{total}}" required><br>
+
+    <label for="name">Name:</label>
+    <input type="text" name="name" required><br>
+
+    <label for="address">Address:</label>
+    <input type="text" name="address" required><br>
+
+    <label for="phone">Phone:</label>
+    <input type="text" name="phone" required><br>
+
+    <label for="place">Place:</label>
+    <input type="text" name="place" required><br>
+
+    <label for="district">District:</label>
+    <input type="text" name="district" required><br>
+
+    <label for="gender">payment_type:</label>
+    <input type="radio" name="payment_type" value="cod" required> COD
+    <input type="radio" name="payment_type" value="paypal" required> PAYPAL<br>
+
+
+    <input type="submit" value="Submit">
+</form>

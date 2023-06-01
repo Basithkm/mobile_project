@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
-from .models import *
+from . models import *
 from django.http import JsonResponse
 from django.urls import reverse
 from django.shortcuts import render,redirect,get_object_or_404
@@ -131,13 +131,10 @@ def product_inner_page(request,id):
 
 
 
-# def remove_from_cart(request, cart_item_id):
-#     cart_item = get_object_or_404(CartItem, id=cart_item_id)
-#     cart_item.delete()
-#     return JsonResponse({'success': True})
-
-
-
+def delete_from_cart(request, cart_item_id):
+    cart_item = get_object_or_404(CartItem, id=cart_item_id)
+    cart_item.delete()
+    return JsonResponse({'success': True})
 
 
 
@@ -157,6 +154,7 @@ def add_to_cart_item(request, id):
         return render(request,'registration/login.html')
     
 
+
 def add_to_cart(request, id):
     cart_item = get_object_or_404(CartItem, id=id,user=request.user)
     if request.user.is_authenticated:
@@ -164,10 +162,12 @@ def add_to_cart(request, id):
         cart_item.quantity += 1
         cart_item.save()
         return redirect("cart_detail")
+        # return JsonResponse({'success': True})
     else:
         url = reverse('signin') 
         return redirect(url)
     
+
 
 def remove_from_cart(request, id):
     cart_item = get_object_or_404(CartItem, id=id, user=request.user)
@@ -179,6 +179,7 @@ def remove_from_cart(request, id):
         else:
             cart_item.delete()
         return redirect("cart_detail")
+        # return JsonResponse({'success': True})
     else:
         url = reverse('signin') 
         return redirect(url)
@@ -193,6 +194,92 @@ def cart_detail(request):
             "cart_items": cart_items,
             "total": total, 
         })
+    else:
+        url = reverse('signin') 
+        return redirect(url)
+
+
+
+
+
+
+def checkout(request):
+    if request.user.is_authenticated:
+        user=request.user
+        cart_items = CartItem.objects.filter(user=request.user)
+        total = sum(item.product.offer_price * item.quantity for item in cart_items)
+        if request.method == 'POST':
+            if request.POST.get('total_price') != '0':
+                if request.POST.get('payment_type')=="cod":
+                    total_checkout_price = request.POST.get('total_price')
+                    name = request.POST.get('name')
+                    address = request.POST.get('address')
+                    phone = request.POST.get('phone')
+                    place = request.POST.get('place')
+                    district = request.POST.get('district')
+                    payment_type = request.POST.get('payment_type')
+            
+                    if address:
+                        add = Address.objects.create(user=request.user,
+                                                total_checkout_price=total_checkout_price,
+                                                  address=address,name=name,phone=phone,
+                                                  place=place,district=district,
+                                                  payment_type=payment_type)
+
+
+
+                        order = Order.objects.create(user=request.user)
+                        for cart_item in cart_items:
+                            OrderItem.objects.create(order=order, delivary_address=add,product=cart_item.product, quantity=cart_item.quantity)
+                        # Address.objects.create(user=request.user,
+                        #                         total_checkout_price=total_checkout_price,
+                        #                           address=address,name=name,phone=phone,
+                        #                           place=place,district=district,
+                        #                           payment_type=payment_type)
+                        
+                        cart_items.delete()
+
+                        return HttpResponse("cod ordersuccess")
+                    
+
+                else:   
+                    print("paypal")
+                    # elif request.POST.get('payment_type')=="paypal":
+                    total_checkout_price = request.POST.get('total_price')
+                    name = request.POST.get('name')
+                    address = request.POST.get('address')
+                    phone = request.POST.get('phone')
+                    place = request.POST.get('place')
+                    district = request.POST.get('district')
+                    payment_type = request.POST.get('payment_type')
+
+                    if address:
+                        order = Order.objects.create(user=request.user)
+                        for cart_item in cart_items:
+                            OrderItem.objects.create(order=order, product=cart_item.product, quantity=cart_item.quantity)
+                        Address.objects.create(user=request.user,
+
+                                                    total_checkout_price=total_checkout_price,
+                                                    address=address,name=name,phone=phone,
+                                                    place=place,district=district,
+                                                    payment_type=payment_type)
+                        
+                        cart_items.delete()
+                        return HttpResponse("paypal ordersuccess")   
+
+            else:
+                return HttpResponse("your amount zero")
+
+
+
+
+
+        context ={
+            "cart_items": cart_items,
+            "total": total, 
+        }
+
+        return render(request, "store/checkout.html",context)
     else:
         url = reverse('signin') 
         return redirect(url)
