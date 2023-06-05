@@ -183,8 +183,6 @@ class OrderItem(models.Model):
 
 
 
-
-
     
     def __str__(self):
         return f"Order {self.order.id} - {self.product.brand_name}"
