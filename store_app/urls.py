@@ -28,6 +28,9 @@ urlpatterns = [
     path("ch",views. checkout, name="checkout"),
 
 
+    path("o",views. my_order, name="my_order"),
+
+
     
     
     

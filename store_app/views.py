@@ -5,18 +5,9 @@ from django.http import JsonResponse
 from django.urls import reverse
 from django.shortcuts import render,redirect,get_object_or_404
 
-from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
-
-
-# def index(request):
-#     product= MobilePuoch.objects.all()
-#     context ={
-#         'product':product
-#     }
-#     return render(request,'store/index.html',context)
 
 
 def index(request):
@@ -137,8 +128,6 @@ def delete_from_cart(request, cart_item_id):
     return JsonResponse({'success': True})
 
 
-
-
 def add_to_cart_item(request, id):
     if request.user.is_authenticated:
         product = get_object_or_404(MobilePouch, id=id)
@@ -213,13 +202,13 @@ def checkout(request):
                 if request.POST.get('payment_type')=="cod":
                     total_checkout_price = request.POST.get('total_price')
                     name = request.POST.get('name')
-                    address = request.POST.get('address')
+                    address = request.POST.get('address','')
                     phone = request.POST.get('phone')
                     place = request.POST.get('place')
                     district = request.POST.get('district')
                     payment_type = request.POST.get('payment_type')
             
-                    if address:
+                    if total_checkout_price:
                         add = Address.objects.create(user=request.user,
                                                 total_checkout_price=total_checkout_price,
                                                   address=address,name=name,phone=phone,
@@ -230,12 +219,7 @@ def checkout(request):
 
                         order = Order.objects.create(user=request.user)
                         for cart_item in cart_items:
-                            OrderItem.objects.create(order=order, delivary_address=add,product=cart_item.product, quantity=cart_item.quantity)
-                        # Address.objects.create(user=request.user,
-                        #                         total_checkout_price=total_checkout_price,
-                        #                           address=address,name=name,phone=phone,
-                        #                           place=place,district=district,
-                        #                           payment_type=payment_type)
+                            OrderItem.objects.create(user=user,order=order, delivary_address=add,product=cart_item.product, quantity=cart_item.quantity)
                         
                         cart_items.delete()
 
@@ -258,7 +242,6 @@ def checkout(request):
                         for cart_item in cart_items:
                             OrderItem.objects.create(order=order, product=cart_item.product, quantity=cart_item.quantity)
                         Address.objects.create(user=request.user,
-
                                                     total_checkout_price=total_checkout_price,
                                                     address=address,name=name,phone=phone,
                                                     place=place,district=district,
@@ -280,6 +263,22 @@ def checkout(request):
         }
 
         return render(request, "store/checkout.html",context)
+    else:
+        url = reverse('signin') 
+        return redirect(url)
+
+
+
+
+def my_order(request):
+    if request.user.is_authenticated:
+        user=request.user
+        orders = OrderItem.objects.filter(user=request.user)
+        total = sum(item.product.offer_price * item.quantity for item in orders)
+        return render(request, "store/my_order.html", {
+            "orders": orders,
+            "total": total, 
+        })
     else:
         url = reverse('signin') 
         return redirect(url)

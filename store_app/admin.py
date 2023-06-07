@@ -71,17 +71,21 @@ class OrderItemAdmin(admin.ModelAdmin):
         return product.product.offer_price
     
 
-    def user(self,product):
-        return product.order.user
+    # def user(self,product):
+    #     return product.order.user
 
 
 
 
 @admin.register(models.Address)
 class AddressItemAdmin(admin.ModelAdmin):
-    list_display =['name','phone','place','district','payment_type','total_checkout_price']
+    list_display =['name','phone','place','district','payment_type','order_status']
     list_per_page = 25
 
+
+
+    # def offer_price(self,product):
+    #     return product.product.offer_price
 
 
 # admin.site.register(Cart)

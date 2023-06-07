@@ -1,0 +1,36 @@
+
+<table class="table" border="1">
+    <thead>
+      <tr>
+         <th scope="col">Produxct</th>
+         <th scope="col">quantity</th>
+        <th scope="col">price</th> 
+        <th scope="col">total</th> 
+        <th scope="col">Name</th>
+        <th scope="col">Address</th>
+        <th scope="col">phone</th>
+        <th scope="col">method</th>
+        <th scope="col">status</th>
+    
+      </tr>
+    </thead>
+    <tbody>
+      {% for orders in orders %}
+      <tr>
+        <td scope="col">{{ orders.product.brand_name }}</td>
+        <td scope="col">{{ orders.quantity }}</td>
+        <td scope="col">{{ orders.product.offer_price }}</td>
+        <td scope="col">{{ orders.total }}</td>
+        <td scope="col">{{ orders.delivary_address.name}}</td>
+         <td scope="col">{{ orders.delivary_address.place }}</td>
+        <td scope="col">{{ orders.delivary_address.phone }}</td>
+        <td scope="col">{{ orders.delivary_address.payment_type }}</td>
+        <td scope="col">{{ orders.delivary_address.order_status }}</td>
+       
+      {%endfor%}
+  
+    </tbody>
+  </table>
+<div class="row justify-content-center">
+  <h3>Total: Rs   :{{total}}/- <span class="badge badge-primary" id="total"></span></h3>
+  </div>  
