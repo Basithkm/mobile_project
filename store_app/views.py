@@ -4,6 +4,10 @@ from . models import *
 from django.http import JsonResponse
 from django.urls import reverse
 from django.shortcuts import render,redirect,get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+import json
+import razorpay
+from mobile_project.settings import (RAZORPAY_KEY_ID,RAZORPAY_KEY_SECRET)
 
 
 # Create your views here.
@@ -178,11 +182,14 @@ def cart_detail(request):
     if request.user.is_authenticated:
         user=request.user
         cart_items = CartItem.objects.filter(user=request.user)
+
         total = sum(item.product.offer_price * item.quantity for item in cart_items)
-        return render(request, "store/cart.html", {
+
+        return render(request,"store/cart.html", {
             "cart_items": cart_items,
             "total": total, 
         })
+    
     else:
         url = reverse('signin') 
         return redirect(url)
@@ -198,9 +205,9 @@ def checkout(request):
         cart_items = CartItem.objects.filter(user=request.user)
         total = sum(item.product.offer_price * item.quantity for item in cart_items)
         if request.method == 'POST':
-            if request.POST.get('total_price') != '0':
+            if request.POST.get('total_checkout_price') != '0':
                 if request.POST.get('payment_type')=="cod":
-                    total_checkout_price = request.POST.get('total_price')
+                    total_checkout_price = request.POST.get('total_checkout_price')
                     name = request.POST.get('name')
                     address = request.POST.get('address','')
                     phone = request.POST.get('phone')
@@ -225,11 +232,9 @@ def checkout(request):
 
                         return HttpResponse("cod ordersuccess")
                     
+                elif request.POST.get('payment_type')=="paypal":
 
-                else:   
-                    print("paypal")
-                    # elif request.POST.get('payment_type')=="paypal":
-                    total_checkout_price = request.POST.get('total_price')
+                    total_checkout_price = request.POST.get('total_checkout_price')
                     name = request.POST.get('name')
                     address = request.POST.get('address')
                     phone = request.POST.get('phone')
@@ -237,21 +242,44 @@ def checkout(request):
                     district = request.POST.get('district')
                     payment_type = request.POST.get('payment_type')
 
-                    if address:
-                        order = Order.objects.create(user=request.user)
-                        for cart_item in cart_items:
-                            OrderItem.objects.create(order=order, product=cart_item.product, quantity=cart_item.quantity)
-                        Address.objects.create(user=request.user,
-                                                    total_checkout_price=total_checkout_price,
+                    client = razorpay.Client(auth=('rzp_test_8UagrbDvjbAaIv','GF9RtYsotv4MB175buR2udiP'))
+                    razorpay_order = client.order.create(
+                        {"amount": float(total_checkout_price) * 100, "currency": "INR", "payment_capture": "1"}
+                    )
+                    order = Address.objects.create(
+                            total_checkout_price=total_checkout_price,
                                                     address=address,name=name,phone=phone,
                                                     place=place,district=district,
-                                                    payment_type=payment_type)
-                        
-                        cart_items.delete()
-                        return HttpResponse("paypal ordersuccess")   
+                                                    payment_type=payment_type,
+                                                        provider_order_id=razorpay_order["id"]
+                        )
+                    order.save()
+                    return render(request,"pay/payment.html",{"callback_url": "http://" + "127.0.0.1:8000" + "/razorpay/callback/",
+                        "razorpay_key": "rzp_test_8UagrbDvjbAaIv",
+                        "order": order,
+                        },
+                        )
+                return render(request, "pay/payment.html")
 
-            else:
-                return HttpResponse("your amount zero")
+                        
+
+                    
+
+                    # if address:
+                    #     order = Order.objects.create(user=request.user)
+                    #     for cart_item in cart_items:
+                    #         OrderItem.objects.create(order=order, product=cart_item.product, quantity=cart_item.quantity)
+                    #     Address.objects.create(user=request.user,
+                    #                                 total_checkout_price=total_checkout_price,
+                    #                                 address=address,name=name,phone=phone,
+                    #                                 place=place,district=district,
+                    #                                 payment_type=payment_type)
+                        
+                    #     cart_items.delete()
+                    #     return HttpResponse("paypal ordersuccess")   
+
+            # else:
+            #     return HttpResponse("your amount zero")
 
 
 
@@ -274,6 +302,10 @@ def my_order(request):
     if request.user.is_authenticated:
         user=request.user
         orders = OrderItem.objects.filter(user=request.user)
+        
+        # a= orders.request.quantity
+
+        # print(orders)
         total = sum(item.product.offer_price * item.quantity for item in orders)
         return render(request, "store/my_order.html", {
             "orders": orders,
@@ -282,3 +314,68 @@ def my_order(request):
     else:
         url = reverse('signin') 
         return redirect(url)
+
+
+
+# def order_payment(request):
+#     if request.method == "POST":
+#         name = request.POST.get("name")
+#         amount = request.POST.get("amount")
+#         client = razorpay.Client(auth=('rzp_test_8UagrbDvjbAaIv','GF9RtYsotv4MB175buR2udiP'))
+#         razorpay_order = client.order.create(
+#             {"amount": int(amount) * 100, "currency": "INR", "payment_capture": "1"}
+#         )
+#         order = Order.objects.create(
+#             name=name, amount=amount, provider_order_id=razorpay_order["id"]
+#         )
+#         order.save()
+
+#         return render(request,"payment.html",{"callback_url": "http://" + "127.0.0.1:8000" + "/razorpay/callback/",
+#                 "razorpay_key": "rzp_test_8UagrbDvjbAaIv",
+#                 "order": order,
+#             },
+#         )
+    
+
+#     return render(request, "pay/payment.html")
+
+
+
+
+@csrf_exempt
+def callback(request):
+    def verify_signature(response_data):
+        client = razorpay.Client(auth=('rzp_test_8UagrbDvjbAaIv','GF9RtYsotv4MB175buR2udiP'))
+        print(response_data)
+        return client.utility.verify_payment_signature(response_data)
+        
+    if "razorpay_signature" in request.POST:
+        payment_id = request.POST.get("razorpay_payment_id", "")
+        provider_order_id = request.POST.get("razorpay_order_id", "")
+        signature_id = request.POST.get("razorpay_signature", "")
+        
+        order = Address.objects.get(provider_order_id=provider_order_id)
+        order.payment_id = payment_id
+        order.signature_id = signature_id
+        order.save()
+
+        if not verify_signature(request.POST):
+            order.status = PaymentStatus.SUCCESS
+            order.save()
+
+            return render(request, "pay/callback.html", context={"status": order.status})
+        else:
+            order.status = PaymentStatus.FAILURE
+            order.save()
+
+            return render(request, "pay/callback.html", context={"status": order.status})
+    else:
+        payment_id = json.loads(request.POST.get("error[metadata]")).get("payment_id")
+        provider_order_id = json.loads(request.POST.get("error[metadata]")).get(
+            "order_id"
+        )
+        order = Address.objects.get(provider_order_id=provider_order_id)
+        order.payment_id = payment_id
+        order.status = PaymentStatus.FAILURE
+
+        return render(request, "pay/callback.html", context={"status": order.status})

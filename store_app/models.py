@@ -6,6 +6,14 @@ from registration.models import Account
 
 
 
+from django.db import models
+from django.db.models.fields import CharField
+from django.utils.translation import gettext_lazy as _
+from .constants import PaymentStatus
+
+
+
+
 class MobileBrand(models.Model):
     brand_name= models.CharField(max_length=255,blank=True,null=True)
     cover_image_brand=models.ImageField(upload_to='main_images_branch',blank=False,null=False)
@@ -169,8 +177,33 @@ class Address(models.Model):
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
     # product =models.ForeignKey(MobilePouch, on_delete=models.CASCADE)
     # quantity = models.PositiveIntegerField(default=1,null=True)
-    total_checkout_price =models.DecimalField(max_digits=10, decimal_places=2,blank=False,null=False)
-    name = models.CharField(max_length=100,blank=False,null=False)
+    # total_checkout_price =models.DecimalField(max_digits=10, decimal_places=2,blank=False,null=False)
+    # name = models.CharField(max_length=100,blank=False,null=False)
+    name = CharField(_("Customer Name"), max_length=254, blank=False, null=False)
+    total_checkout_price = models.FloatField(_("Amount"), null=False, blank=False)
+
+
+    status = CharField(
+        _("Payment Status"),
+        default=PaymentStatus.PENDING,
+        max_length=254,
+        blank=False,
+        null=False,
+    )
+    provider_order_id = models.CharField(
+        _("Order ID"), max_length=40, null=True, blank=True
+    )
+    payment_id = models.CharField(
+        _("Payment ID"), max_length=36, null=True, blank=True
+    )
+    signature_id = models.CharField(
+        _("Signature ID"), max_length=128, null=True, blank=True
+    )
+
+    def __str__(self):
+        return f"{self.id}-{self.name}-{self.status}"
+
+
     address = models.CharField(max_length=200,blank=False,null=False)
     phone = models.CharField(max_length=20,blank=False,null=False)
     place = models.CharField(max_length=100,blank=False,null=False)

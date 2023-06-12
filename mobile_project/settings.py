@@ -10,10 +10,27 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+
+import os
+import sys
+import environ
+# from pathlib import Path
+
+# # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+# # BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# BASE_DIR = Path(__file__).resolve().parent.parent
+# sys.path.insert(0, os.path.join(BASE_DIR))
+
+# base = environ.Path(__file__) - 4
+# environ.Env.read_env(env_file=base(".env"))
+# env = environ.Env()
+
+
 from pathlib import Path
 import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+env = environ.Env()
 
 
 # Quick-start development settings - unsuitable for production
@@ -26,6 +43,19 @@ SECRET_KEY = 'django-insecure-3b5mw8&btu(oui0)kg&43dand-a7n84b@m3k0fsv&$kgxa4=_w
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+# settings.py
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+
+
+# settings.py
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+
 
 
 # Application definition
@@ -134,3 +164,7 @@ STATIC_URL = 'static/'
 STATIC_ROOT =[
     os.path.join(BASE_DIR,'static')
 ]
+
+
+RAZORPAY_KEY_ID = env("rzp_test_8UagrbDvjbAaIv", default="")
+RAZORPAY_KEY_SECRET = env("GF9RtYsotv4MB175buR2udiP", default="")
